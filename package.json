@@ -25,6 +25,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "build": "babel src -d lib"
+    "build": "babel src -d lib",
+    "testdbg": "mocha --inspect-brk"
   }
 }

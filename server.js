@@ -30,6 +30,7 @@ const routes = {
     'PUT': downvoteArticle
   },
   '/comments':{
+    'POST': createComment
 
   },
   '/comments/:id':{
@@ -42,6 +43,73 @@ const routes = {
 
   },
 };
+function createComment(url,request) {
+  //This is a faster way to assign a value to requestComment
+  //while checking if the derivative objects exists.
+  //If request.body did not exist then it would be undefined
+  //and would not be assigned to requestComment
+  const requestComment = request.body && request.body.comment;
+  //console.log(requestComment);
+  
+  //Initializes an object for our output
+  const response = {};
+
+  //This checks that all objects are defined before using code
+  if (requestComment &&
+
+    //Theses are the property objects that should exist for requestComment
+    requestComment.body &&
+    requestComment.username &&
+    requestComment.articleId &&
+
+    //This checks that the request's username
+    //exists in our database of users
+    database.users[requestComment.username] &&
+
+    //Checks if the request's article exists
+    //in our database of articles
+    database.articles[requestComment.articleId])
+
+    {
+    //Creates our comment object
+    const commentToAdd = {
+      id: database.nextCommentId++,
+      body: requestComment.body,
+      articleId: requestComment.articleId,
+      username: requestComment.username,
+      upvotedBy: [],
+      downvotedBy: []
+    };
+
+
+    //Adds our object at the id index
+    //of the database.comment object
+    database.comments[commentToAdd.id] = commentToAdd;
+
+    //Finds our commentToAdd object's username at index in users,
+    //Accesses it's commentIds property (Initially a Blank Array),
+    //and pushes the id of our comment object to it
+    database.users[commentToAdd.username].commentIds.push(commentToAdd.id);
+    //console.log(database.users[commentToAdd.username].commentIds);
+
+    //Finds our object's associated article using articleId
+    //Acceses commentIds property (Initially a Blank Array),
+    //and pushes the id of our comment object to it
+    database.articles[commentToAdd.articleId].commentIds.push(commentToAdd.id);
+    //console.log(database.articles[commentToAdd.articleId].commentIds);
+
+    //Creates the property "body" in our response object
+    response.body = {comment: commentToAdd};
+    response.status = 201;
+  }
+
+  else {//Code executed when our if statement above fails
+    response.status = 400;
+  }
+  //console.log(response);
+  return response;
+}
+
 
 function getUser(url, request) {
   const username = url.split('/').filter(segment => segment)[1];
@@ -143,7 +211,7 @@ function createArticle(url, request) {
     };
 
     database.articles[article.id] = article;
-    database.users[article.username].articleIds.push(article.id);
+    database.users[article.username].commentIds.push(article.id);
 
     response.body = {article: article};
     response.status = 201;
