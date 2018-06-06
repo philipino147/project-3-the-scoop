@@ -34,7 +34,7 @@ const routes = {
 
   },
   '/comments/:id':{
-
+    'PUT': updateComment
   },
   '/comments/:id/upvote':{
 
@@ -43,6 +43,43 @@ const routes = {
 
   },
 };
+
+function updateComment(url,request){
+  const changeComment = request.body && request.body.comment;
+  const response = {};
+
+  if(database.comments[url.slice(-1)] === undefined)
+  {
+    response.status = 404;
+    return response;
+    }
+  if(changeComment &&
+
+  changeComment.id &&
+  changeComment.body &&
+  changeComment.username &&
+  changeComment.articleId&&
+
+  database.comments[changeComment.id])
+  {
+    const updatedComment = {
+      id: changeComment.id,
+      body: changeComment.body,
+      username: changeComment.username,
+      articleId: changeComment.articleId
+    }
+
+    database.comments[changeComment.id] = updatedComment;
+    response.status = 200;
+  }
+
+  else {
+    response.status = 400;
+  }
+  //console.log(response);
+  return  response
+}
+
 function createComment(url,request) {
   //This is a faster way to assign a value to requestComment
   //while checking if the derivative objects exists.
@@ -50,7 +87,7 @@ function createComment(url,request) {
   //and would not be assigned to requestComment
   const requestComment = request.body && request.body.comment;
   //console.log(requestComment);
-  
+
   //Initializes an object for our output
   const response = {};
 
@@ -223,7 +260,10 @@ function createArticle(url, request) {
 }
 
 function updateArticle(url, request) {
+
+  //Used to locate the last portion of the URL realted to the article id
   const id = Number(url.split('/').filter(segment => segment)[1]);
+
   const savedArticle = database.articles[id];
   const requestArticle = request.body && request.body.article;
   const response = {};
