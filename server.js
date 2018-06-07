@@ -34,15 +34,73 @@ const routes = {
 
   },
   '/comments/:id':{
-    'PUT': updateComment
+    'PUT': updateComment,
+    'DELETE': deleteComment
   },
   '/comments/:id/upvote':{
-
+    'PUT': upvoteComment
   },
   '/comments/:id/downvote':{
-
+    'PUT': downvoteComment
   },
 };
+
+function downvoteComment(){
+
+}
+
+function upvoteComment(){
+
+}
+
+function deleteComment(url,request){
+  //Note** The request arg does not have much functionality
+  //here but could be useful for validation purposes.
+  //One example could be checking that the username of the client
+  //matches that of the comments author so that they're not deleting
+  //someone else's comment
+
+  //Checks the URL to find the comment's id
+  const delCommentId = Number(url.split('/').filter(segment => segment)[1]);
+
+  //Finds our Comment Object
+  const targetComment = database.comments[delCommentId];
+
+  const response = {};
+
+  //Checks if our comment object exists
+  if(targetComment){
+
+  //Finds correct article based on our Comment Object
+  const targetArticle = database.articles[targetComment.articleId];
+
+  //Finds the index of our comment in the article
+  const articleIndex = targetArticle.commentIds.indexOf(delCommentId);
+
+  //Removes the comment's id from the article
+  database.articles[targetComment.articleId].commentIds.splice(articleIndex,1)
+
+  //Finds correct user based on our Comment Object
+  const targetUser = database.users[targetComment.username];
+
+  //finds the index of our comment in the user's comments
+  const userIndex = targetUser.commentIds.indexOf(delCommentId);
+
+  //Removes the comment's id from the user
+  database.users[targetComment.username].commentIds.splice(userIndex,1);
+
+  //Removes the existence of the comment in our database
+  database.comments[delCommentId] = null;
+
+  //A response code for succesful delete
+  response.status = 204;
+  }
+  else {
+    //A response code for non-existent item
+    response.status = 404;
+  }
+  return response;
+}
 
 function updateComment(url,request){
   const changeComment = request.body && request.body.comment;
