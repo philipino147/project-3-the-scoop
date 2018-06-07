@@ -46,10 +46,35 @@ const routes = {
 };
 
 function downvoteComment(){
-
+  
 }
 
-function upvoteComment(){
+function upvoteComment(url,request){
+  const upCommentId = Number(url.split('/').filter(segment => segment)[1]);
+
+  const userUpvote = request.body && request.body.username;
+
+  //We allow commentToUpvote to be variable in this case
+  //so that it may be reassigned to the upvoted comment afterwards
+  let commentToUpvote = database.comments[upCommentId];
+
+  const response = {};
+
+  if(userUpvote &&
+  commentToUpvote &&
+  database.users[userUpvote]){
+    commentToUpvote = upvote(commentToUpvote,userUpvote);
+    database.comments[upCommentId] = commentToUpvote;
+
+    response.body = {comment : commentToUpvote};
+    response.status = 200;
+  }
+
+  else {
+    response.status = 400;
+  }
+
+  return response
 
 }
 
@@ -58,7 +83,7 @@ function deleteComment(url,request){
   //here but could be useful for validation purposes.
   //One example could be checking that the username of the client
   //matches that of the comments author so that they're not deleting
-  //someone else's comment
+  //someone else's comment.
 
   //Checks the URL to find the comment's id
   const delCommentId = Number(url.split('/').filter(segment => segment)[1]);
@@ -401,9 +426,16 @@ function downvoteArticle(url, request) {
 }
 
 function upvote(item, username) {
+  //Used to check if our item (comment OR article) was
+  //already downvoted by the current user.
+  //If true, it removes their name from the downvotedBy array
   if (item.downvotedBy.includes(username)) {
     item.downvotedBy.splice(item.downvotedBy.indexOf(username), 1);
   }
+
+  //Next we check if current user is NOT included in the
+  //upvotedBy array for the selected item.
+  //If true, we add their name to the upvotedBy array
   if (!item.upvotedBy.includes(username)) {
     item.upvotedBy.push(username);
   }
