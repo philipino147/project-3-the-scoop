@@ -45,8 +45,45 @@ const routes = {
   },
 };
 
-function downvoteComment(){
+function downvoteComment(url,request){
+
+  //Used tp retreive the target comment's Id from the URL
+  const downCommentId = Number(url.split('/').filter(segment => segment)[1]);
   
+  const userDownvote = request.body && request.body.username;
+
+  //We allow commentToDownvote to be variable in this case
+  //so that it may be reassigned to the downvoted comment afterwards
+  let commentToDownvote = database.comments[downCommentId];
+
+  const response = {};
+
+  if(userDownvote && //Checks if a user is given
+
+    //Checks for existence of a valid target comment (taken from URL)
+  commentToDownvote &&
+
+  //Checks if given user exists in our database
+  database.users[userDownvote]){
+
+    //Updates our target comment to include given user
+    //in the comment's downvotedBy array by using the function downvote
+    commentToDownvote = downvote(commentToDownvote,userDownvote);
+
+    //Updates the database with the new comment
+    database.comments[downCommentId] = commentToDownvote;
+
+    //Returns the new comment and a
+    response.body = {comment : commentToDownvote};
+    response.status = 200;
+  }
+
+  else {
+    response.status = 400;
+  }
+
+  return response
+
 }
 
 function upvoteComment(url,request){
@@ -86,7 +123,8 @@ function deleteComment(url,request){
   //someone else's comment.
 
   //Checks the URL to find the comment's id
-  const delCommentId = Number(url.split('/').filter(segment => segment)[1]);
+  const delCommentId = Number(url.split('/').filter(function (segment) {
+    return segment})[1]);
 
   //Finds our Comment Object
   const targetComment = database.comments[delCommentId];
