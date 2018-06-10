@@ -491,8 +491,38 @@ function downvote(item, username) {
 }
 
 function loadDatabase(){
-  let fileYAML = require('js-yaml');
+  //Used to read text from a yaml file and output it to the console()
+  const fileYAML = require('js-yaml');
+  const fs = require('fs');
+
+  // Get document, or throw exception on error
+try {
+  //Attempts to retrieve the file data
+  const doc = fileYAML.safeLoad(fs.readFileSync('database.yml', 'utf8'));
+  //Sets indents in the loaded JSON object for readability
+  const indentedDoc = JSON.stringify(doc, null, 4);
+  //console.log(indentedDoc);
+  return indentedDoc;
+} catch (e) {
+  //If data not retreived then outputs the error
+  console.log(e);
+  return;
 }
+}
+
+
+
+function saveDatabase(){
+  const fileYAML = require('js-yaml');
+  const fs = require('fs');
+  //Used to save the database object to a yaml-encoded file
+  const doc = fileYAML.safeDump (database, {
+  'sortKeys': false       //does not sort object keys
+});
+  //console.log(doc);
+  return doc;
+}
+
 // Write all code above this line.
 
 const http = require('http');
