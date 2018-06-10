@@ -49,7 +49,7 @@ function downvoteComment(url,request){
 
   //Used tp retreive the target comment's Id from the URL
   const downCommentId = Number(url.split('/').filter(segment => segment)[1]);
-  
+
   const userDownvote = request.body && request.body.username;
 
   //We allow commentToDownvote to be variable in this case
@@ -490,6 +490,9 @@ function downvote(item, username) {
   return item;
 }
 
+function loadDatabase(){
+  let fileYAML = require('js-yaml');
+}
 // Write all code above this line.
 
 const http = require('http');
